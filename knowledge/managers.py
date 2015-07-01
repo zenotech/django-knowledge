@@ -7,8 +7,12 @@ class QuestionManager(models.Manager):
     #     return super(QuestionManager, self).get_query_set(*args, **kwargs)
 
     def can_view(self, user):
-        qs = super(QuestionManager, self).get_query_set()\
-                                         .select_related('user')
+        # backwards compatibility
+        method = getattr(
+             super(QuestionManager, self), 'get_queryset',
+             getattr(super(QuestionManager, self), 'get_query_set', None))
+
+        qs = method().select_related('user')
 
         if user.is_staff or user.is_superuser:
             return qs.all()
